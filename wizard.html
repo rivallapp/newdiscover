@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volo Activity Wizard · Inline Copy (Fixed)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Regular weight */
+        @font-face {
+            font-family: 'VoloSansPro';
+            src: url('./VoloSansPro.woff') format('woff'),
+                 url('./VoloSansPro.otf') format('opentype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        /* Ultra / ExtraBold weight */
+        @font-face {
+            font-family: 'VoloSansPro';
+            src: url('./VoloSans-ultra.ttf') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        body {
+            font-family: 'VoloSansPro', 'Inter', sans-serif;
+            background-color: #ffffff; /* Page background changed to white */
+        }
+    .bg-volo-blue { background-color: #0034dc; }
+    .text-volo-blue { color: #0034dc; }
+    .border-volo-blue { border-color: #0034dc; }
+    .hover\:bg-volo-blue-light:hover { background-color: #e0e9ff; }
+    .hover\:bg-volo-blue-dark:hover { background-color: #0028a7; }
+    .pill { display:inline-flex; align-items:center; padding:.5rem 1rem; border-radius:9999px; font-size:.875rem; font-weight:500; background:#e5e7eb; color:#374151; border:2px solid transparent; cursor:pointer; transition:all .2s; }
+    .pill:hover { background:#d1d5db; }
+    .pill.active { background:#dbeafe; color:#1d4ed8; border-color:#0034dc; font-weight:600; }
+    .skill-button { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1rem; border-radius:.75rem; font-size:.875rem; font-weight:600; background:#f3f4f6; color:#111827; border:2px solid transparent; cursor:pointer; transition:all .2s; text-align:center; min-height:120px; }
+    .skill-button:hover { background:#e5e7eb; }
+    .skill-button.active { background:#dbeafe; color:#1d4ed8; border-color:#0034dc; }
+    .skill-button span:first-child{ font-size:1.875rem; line-height:2.25rem; }
+    .skill-button span:nth-child(2){ margin-top:.25rem; }
+    .skill-button span:nth-child(3){ margin-top:.125rem; font-size:.75rem; color:#6b7280; font-style:italic; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" style="height: 84vh; max-height: 780px;">
+    <header class="relative bg-volo-blue text-white p-4 md:p-5 text-center shadow-md z-10">
+      <!-- In-modal close button (top-right of the modal panel) -->
+      <button type="button" aria-label="Close" onclick="closeWizardModal()" class="absolute right-3 top-3 inline-flex items-center justify-center rounded-full w-8 h-8 bg-white/20 hover:bg-white/30 text-white">
+        <i data-lucide="x" class="h-5 w-5"></i>
+      </button>
+      <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">LET'S FIND YOUR FUN</h1>
+      <!-- Desktop: Wing icons + headline -->
+      <div class="mt-2 hidden lg:flex items-center justify-center gap-3">
+        <!-- Left wing (mirrored) -->
+        <svg width="20" height="32" viewBox="0 0 20 32" xmlns="http://www.w3.org/2000/svg" class="text-white z-0 scale-x-[-1]" aria-hidden="true" focusable="false">
+          <title>wing</title>
+          <defs><rect id="path-1" x="0.2781" y="0" width="18.8235" height="32"></rect></defs>
+          <g stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+            <g>
+              <mask id="mask-2" fill="white"><use href="#path-1" transform="translate(9.6899, 16) scale(-1, 1) translate(-9.6899, -16)"></use></mask>
+              <g transform="translate(9.6899, 16) scale(-1, 1) translate(-9.6899, -16)"></g>
+              <g mask="url(#mask-2)" fill="currentColor">
+                <path d="M4.07,25.417 L4.732,24.455 L3.029,23.649 L2.367,24.611 L3.218,25.014 C1.746,27.153 2.459,29.789 4.81,30.901 C5.555,31.253 6.409,31.421 7.288,31.389 L7.606,31.377 L7.681,29.632 L7.363,29.644 C6.836,29.664 6.323,29.563 5.876,29.352 C4.465,28.685 4.037,27.103 4.92,25.82 L4.07,25.417 Z"></path>
+                <path d="M12.36,0.49 C11.9691422,0.198797089 11.4283185,0.218765964 11.06,0.538 C9.016,2.075 7.847,3.85 7.762,5.84 C7.677,7.83 8.697,9.524 10.616,10.914 C11.0067386,11.2055857 11.5478286,11.185607 11.916,10.866 C13.96,9.329 15.129,7.554 15.214,5.564 C15.21,3.573 14.19,1.88 12.36,0.49 Z M11.63,2.37 C12.774,3.385 13.256,4.474 13.206,5.64 C13.156,6.807 12.579,7.935 11.345,9.039 C10.201,8.024 9.719,6.935 9.769,5.769 C9.819,4.602 10.396,3.474 11.63,2.37 L11.63,2.37 Z"></path>
+                <path d="M14.65,24.179 C14.9191424,23.8644889 14.8990488,23.3953465 14.604,23.105 C13.074,21.377 11.188,20.434 8.942,20.517 C6.697,20.6 4.725,21.687 3.042,23.534 C2.77285759,23.8485111 2.79295121,24.3176535 3.088,24.608 C4.619,26.336 6.504,27.279 8.75,27.196 C10.995,27.113 12.967,26.026 14.65,24.179 L14.65,24.179 Z M12.567,23.72 C11.332,24.881 10.088,25.405 8.823,25.452 C7.559,25.499 6.355,25.066 5.216,23.993 C6.452,22.832 7.696,22.308 8.96,22.261 C10.225,22.214 11.428,22.647 12.567,23.72 Z"></path>
+                <path d="M18.76,15.944 C18.8453112,15.7441849 18.826982,15.5152053 18.7109716,15.3315055 C18.5949611,15.1478056 18.3960848,15.0328454 18.179,15.024 C15.819,14.287 13.582,14.37 11.601,15.456 C9.629,16.537 8.452,18.315 7.951,20.596 C7.86574061,20.7956567 7.88395773,21.0244512 7.9997368,21.2081007 C8.11551586,21.3917503 8.31409444,21.5068386 8.531,21.516 C10.892,22.253 13.129,22.169 15.11,21.083 C17.082,20.002 18.259,18.225 18.76,15.944 L18.76,15.944 Z M16.6,16.466 C16.12,17.996 15.274,19.008 14.14,19.629 C13.022,20.242 11.708,20.429 10.112,20.075 C10.592,18.545 11.438,17.533 12.572,16.912 C13.69,16.3 15.003,16.112 16.6,16.466 Z"></path>
+                <path d="M17.89,7.283 C17.8568555,7.1016304 17.7494664,6.94234626 17.5937616,6.84360665 C17.4380569,6.74486704 17.2481884,6.71564638 17.07,6.763 C14.517,7.229 12.552,8.315 11.372,10.093 C10.196,11.863 10.107,13.856 10.918,15.974 C10.9511445,16.1553696 11.0585336,16.3146537 11.2142384,16.4133934 C11.3699431,16.512133 11.5598116,16.5413536 11.738,16.494 C14.29,16.028 16.256,14.942 17.436,13.164 C18.612,11.394 18.701,9.401 17.89,7.283 Z M16.22,8.661 C16.618,10.126 16.413,11.346 15.724,12.383 C15.045,13.406 13.958,14.157 12.339,14.592 C11.941,13.127 12.146,11.907 12.835,10.87 C13.514,9.847 14.601,9.096 16.22,8.661 Z"></path>
+              </g>
+            </g>
+          </g>
+        </svg>
+        <h2 class="text-white text-lg md:text-xl font-black">Join over <span class="text-[#c7ff10]">350,000</span> players</h2>
+        <!-- Right wing -->
+        <svg width="20" height="32" viewBox="0 0 20 32" xmlns="http://www.w3.org/2000/svg" class="text-white z-0" aria-hidden="true" focusable="false">
+          <title>wing</title>
+          <defs><rect id="path-1b" x="0.2781" y="0" width="18.8235" height="32"></rect></defs>
+          <g stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+            <g>
+              <mask id="mask-2b" fill="white"><use href="#path-1b" transform="translate(9.6899, 16) scale(-1, 1) translate(-9.6899, -16)"></use></mask>
+              <g transform="translate(9.6899, 16) scale(-1, 1) translate(-9.6899, -16)"></g>
+              <g mask="url(#mask-2b)" fill="currentColor">
+                <path d="M4.07,25.417 L4.732,24.455 L3.029,23.649 L2.367,24.611 L3.218,25.014 C1.746,27.153 2.459,29.789 4.81,30.901 C5.555,31.253 6.409,31.421 7.288,31.389 L7.606,31.377 L7.681,29.632 L7.363,29.644 C6.836,29.664 6.323,29.563 5.876,29.352 C4.465,28.685 4.037,27.103 4.92,25.82 L4.07,25.417 Z"></path>
+                <path d="M12.36,0.49 C11.9691422,0.198797089 11.4283185,0.218765964 11.06,0.538 C9.016,2.075 7.847,3.85 7.762,5.84 C7.677,7.83 8.697,9.524 10.616,10.914 C11.0067386,11.2055857 11.5478286,11.185607 11.916,10.866 C13.96,9.329 15.129,7.554 15.214,5.564 C15.21,3.573 14.19,1.88 12.36,0.49 Z M11.63,2.37 C12.774,3.385 13.256,4.474 13.206,5.64 C13.156,6.807 12.579,7.935 11.345,9.039 C10.201,8.024 9.719,6.935 9.769,5.769 C9.819,4.602 10.396,3.474 11.63,2.37 L11.63,2.37 Z"></path>
+                <path d="M14.65,24.179 C14.9191424,23.8644889 14.8990488,23.3953465 14.604,23.105 C13.074,21.377 11.188,20.434 8.942,20.517 C6.697,20.6 4.725,21.687 3.042,23.534 C2.77285759,23.8485111 2.79295121,24.3176535 3.088,24.608 C4.619,26.336 6.504,27.279 8.75,27.196 C10.995,27.113 12.967,26.026 14.65,24.179 L14.65,24.179 Z M12.567,23.72 C11.332,24.881 10.088,25.405 8.823,25.452 C7.559,25.499 6.355,25.066 5.216,23.993 C6.452,22.832 7.696,22.308 8.96,22.261 C10.225,22.214 11.428,22.647 12.567,23.72 Z"></path>
+                <path d="M18.76,15.944 C18.8453112,15.7441849 18.826982,15.5152053 18.7109716,15.3315055 C18.5949611,15.1478056 18.3960848,15.0328454 18.179,15.024 C15.819,14.287 13.582,14.37 11.601,15.456 C9.629,16.537 8.452,18.315 7.951,20.596 C7.86574061,20.7956567 7.88395773,21.0244512 7.9997368,21.2081007 C8.11551586,21.3917503 8.31409444,21.5068386 8.531,21.516 C10.892,22.253 13.129,22.169 15.11,21.083 C17.082,20.002 18.259,18.225 18.76,15.944 L18.76,15.944 Z M16.6,16.466 C16.12,17.996 15.274,19.008 14.14,19.629 C13.022,20.242 11.708,20.429 10.112,20.075 C10.592,18.545 11.438,17.533 12.572,16.912 C13.69,16.3 15.003,16.112 16.6,16.466 Z"></path>
+                <path d="M17.89,7.283 C17.8568555,7.1016304 17.7494664,6.94234626 17.5937616,6.84360665 C17.4380569,6.74486704 17.2481884,6.71564638 17.07,6.763 C14.517,7.229 12.552,8.315 11.372,10.093 C10.196,11.863 10.107,13.856 10.918,15.974 C10.9511445,16.1553696 11.0585336,16.3146537 11.2142384,16.4133934 C11.3699431,16.512133 11.5598116,16.5413536 11.738,16.494 C14.29,16.028 16.256,14.942 17.436,13.164 C18.612,11.394 18.701,9.401 17.89,7.283 Z M16.22,8.661 C16.618,10.126 16.413,11.346 15.724,12.383 C15.045,13.406 13.958,14.157 12.339,14.592 C11.941,13.127 12.146,11.907 12.835,10.87 C13.514,9.847 14.601,9.096 16.22,8.661 Z"></path>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <!-- Mobile fallback: simple text -->
+      <p class="mt-1 lg:hidden text-sm opacity-90">Join over <span class="text-[#c7ff10] font-semibold">350,000</span> players</p>
+    </header>
+
+    <div class="flex-1 flex flex-row overflow-hidden">
+      <!-- LEFT: Dynamic marketing panel -->
+      <aside id="marketing-panel" class="hidden md:block w-2/5 h-full bg-gradient-to-b from-slate-50 to-white border-r border-gray-200 overflow-y-auto">
+        <div class="p-5 md:p-6 space-y-5" id="marketing-content"></div>
+      </aside>
+
+      <!-- RIGHT: Inline stepper -->
+      <section class="w-full md:w-3/5 h-full flex flex-col bg-gray-50">
+        <div class="flex-1 p-4 md:p-6 overflow-y-auto">
+          <div class="mb-4">
+            <div id="step-title" class="text-lg font-bold text-gray-900"></div>
+            <p id="step-copy" class="text-sm text-gray-600 mt-1"></p>
+          </div>
+          <div id="options-area"></div>
+        </div>
+        <div id="options-footer" class="p-4 md:p-6 border-t border-gray-200 bg-white"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ===== STATE =====
+    const userChoices = {
+      city: 'Baltimore',
+      activity_type: null,        // 'League' | 'Daily' | 'Tournament'
+      daily_subtype: null,        // 'All' | 'Drop-ins' | 'Pickups'
+      sports: [],
+      filters: { skill: [], format: [], day: [], vibe: [] },
+      history: ['start']
+    };
+
+    // ===== CONTENT MODEL =====
+    const marketingLibrary = {
+      base: {
+        hero: {
+          title: 'Join over 350,000 players get their weekly wins with Volo.',
+          image: 'https://volosports.com/img/unsafe/format:webp/quality:80/height:700/width:400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/navbar/nav-about.png'
+        }
+      },
+      stats: {
+        // default/base site-wide stats
+        Base: [
+          { kpi: '4,200+', label: 'active players in {{city}}' },
+          { kpi: '92%', label: 'made a new friend last season' },
+          { kpi: '9/10', label: 'would recommend Volo' }
+        ],
+        League: [
+          { kpi: '120+', label: 'active leagues this season' },
+          { kpi: '78%', label: 'return for another season' },
+          { kpi: '65%', label: 'join with friends' }
+        ],
+        Daily: [
+          { kpi: '250+', label: 'drop‑ins & pickups monthly' },
+          { kpi: '<15 min', label: 'avg time to a game' },
+          { kpi: '88%', label: 'recommend trying a new sport' }
+        ],
+        Tournament: [
+          { kpi: '30+', label: 'tournaments annually' },
+          { kpi: '3–5', label: 'games in a day (typical)' },
+          { kpi: '#1', label: 'for all‑day vibes' }
+        ],
+        DailyKinds: {
+          'All': [
+            { kpi: '250+', label: 'events across all sports' },
+            { kpi: 'Every day', label: 'options on the calendar' },
+            { kpi: '97%', label: 'easy to just show up' }
+          ],
+          'Drop-ins': [
+            { kpi: '140+', label: 'single‑game sessions / mo' },
+            { kpi: 'Best for', label: 'trying new sports' },
+            { kpi: 'Walk‑in', label: 'join friends anytime' }
+          ],
+          'Pickups': [
+            { kpi: '110+', label: 'organised runs / mo' },
+            { kpi: 'We host', label: 'teams & gear provided' },
+            { kpi: 'Perfect', label: 'for tight schedules' }
+          ]
+        }
+      },
+      activity_type: {
+        League: {
+          headline: 'Leagues · weekly seasons',
+          copy: 'A League runs for multiple weeks with one game per week. Join solo or with friends.',
+          bullets: ['6–8 weeks · one game per week', 'Free agent or bring friends', 'Standings, playoffs, champs tees 🏆'],
+          quote: { body: 'Joined solo, left with a squad. Best routine of my week.', author: '— Jess, {{city}} Soccer' },
+          image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/soccer.png'
+        },
+        Daily: {
+          headline: 'Daily events · flexible drop‑ins',
+          copy: 'Daily events are flexible drop‑ins and pickups. No season‑long commitment.',
+          bullets: ['Pickups & drop‑ins every week', 'Show up when you can', 'Great way to try new sports'],
+          quote: { body: 'Easy, flexible, and everyone was welcoming.', author: '— Marco, {{city}} Volleyball' },
+          image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/volleyball.png'
+        },
+        Tournament: {
+          headline: 'Tournaments · one big day',
+          copy: 'Tournaments are single‑day events with multiple games. Big energy in one day.',
+          bullets: ['Multiple games in one day', 'Prizes, DJs, sponsor bars', 'Bring a crew and make memories'],
+          quote: { body: 'An all‑day blast. Played hard, partied harder.', author: '— Priya, {{city}} Kickball' },
+          image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/kickball.png'
+        }
+      },
+      sportHype: {
+        Soccer: { blurb: 'Small‑sided games, big‑time vibes.', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/soccer.png' },
+        Pickleball: { blurb: 'America’s fastest‑growing paddle sport. All levels welcome.', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/pickleball.png' },
+        Basketball: { blurb: 'Run the court. Coed and open runs weekly.', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/volleyball.png' },
+        'Flag Football': { blurb: 'No pads. All fun. Great for teams or free agents.', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/kickball.png' },
+        Volleyball: { blurb: 'Indoor & beach options across the city.', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/volleyball.png' },
+        All: { blurb: 'Try a few! Mix sports to find your crew.', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/soccer.png' }
+      },
+      // quick-compare content for the first step
+      compare: [
+        { key: 'League', title: 'Leagues', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/soccer.png', lines: ['6–8 weeks, once a week', 'Free agent or full team', 'Standings + playoffs'] },
+        { key: 'Daily', title: 'Daily events', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/volleyball.png', lines: ['Drop‑ins & pickups', 'Show up when you can', 'Great for trying new sports'] },
+        { key: 'Tournament', title: 'Tournaments', image: 'https://volosports.com/img/unsafe/format:webp/quality:95/width:700/height:1400/plain/https://volosports-public.s3.us-west-1.amazonaws.com/common/sport-images/kickball.png', lines: ['Single‑day event', 'Multiple games', 'Prizes & party atmosphere'] }
+      ]
+    };
+
+    // ===== CONTROLS =====
+    const sportPills = [
+      { text: 'Soccer ⚽', value: 'Soccer' },
+      { text: 'Pickleball 🥒', value: 'Pickleball' },
+      { text: 'Basketball 🏀', value: 'Basketball' },
+      { text: 'Flag Football 🏈', value: 'Flag Football' },
+      { text: 'Volleyball 🏐', value: 'Volleyball' },
+      { text: 'All Sports', value: 'All' }
+    ];
+
+    const filterPills = {
+      skill: [
+        { name: 'Super Social', explainer: '(Just for fun)', value: 'social', icon: '🥳' },
+        { name: 'Recreational', explainer: '(I know the basics)', value: 'rec', icon: '👍' },
+        { name: 'Intermediate', explainer: '(I\'m pretty good)', value: 'int', icon: '🔥' },
+        { name: 'Competitive', explainer: '(I\'m here to win)', value: 'comp', icon: '🏆' }
+      ],
+      format: [
+        { text: 'Coed (Mixed teams)', value: 'coed' },
+        { text: 'Men\'s', value: 'mens' },
+        { text: 'Women\'s', value: 'womens' },
+        { text: 'Open', value: 'open' }
+      ],
+      day: [
+        { text: 'Weekdays', value: 'weekdays' },
+        { text: 'Weekends', value: 'weekends' }
+      ],
+      vibe: [
+        { text: 'Bar on Site 🍻', value: 'bar' },
+        { text: 'Kid-Friendly 👨‍👩‍👧', value: 'kids' },
+        { text: 'Indoors 🏠', value: 'indoors' }
+      ]
+    };
+
+    // ===== RENDER HELPERS =====
+    function setStepCopy(title, copy){
+      document.getElementById('step-title').textContent = title || '';
+      const copyEl = document.getElementById('step-copy');
+      copyEl.textContent = copy || '';
+      copyEl.classList.remove('text-amber-700');
+    }
+
+    function renderBackButton(container){
+      if (userChoices.history.length <= 1) return;
+      const btn = document.createElement('button');
+      btn.onclick = goBack;
+      btn.className = 'w-auto text-sm text-gray-600 hover:text-volo-blue hover:underline mb-4 rounded-lg hover:bg-gray-100 p-2';
+      btn.innerHTML = '← Back';
+      container.prepend(btn);
+    }
+
+    function renderOptions(options, type='buttons', pillType=null){
+      const optionsAreaEl = document.getElementById('options-area');
+      const optionsFooterEl = document.getElementById('options-footer');
+      optionsAreaEl.innerHTML = '';
+      optionsFooterEl.innerHTML = '';
+      renderBackButton(optionsAreaEl);
+
+      if (type==='buttons'){
+        const box = document.createElement('div');
+        box.className = 'flex flex-col space-y-3';
+        options.forEach(opt=>{
+          const b = document.createElement('button');
+          b.className = 'w-full bg-white text-volo-blue font-semibold py-3 px-4 rounded-full hover:bg-volo-blue-light transition text-left';
+          b.innerHTML = opt.text;
+          b.onclick = () => handleOptionClick(opt.nextStep, opt.value);
+          box.appendChild(b);
+        });
+        optionsAreaEl.appendChild(box);
+      }
+
+      if (type==='pills' && pillType==='sports'){
+        const pillsHtml = sportPills.map(p=>{
+          const active = userChoices.sports.includes(p.value) ? 'active' : '';
+          return `<button class="pill ${active}" onclick='togglePill(this, "sports", "${p.value}")'>${p.text}</button>`;
+        }).join('');
+        const c = document.createElement('div');
+        c.innerHTML = `<div class="flex flex-wrap gap-2">${pillsHtml}</div>`;
+        optionsAreaEl.appendChild(c);
+        // Inline "Your picks spotlight" under the sports pills
+        const spotlight = document.createElement('div');
+        spotlight.id = 'picks-spotlight';
+        spotlight.className = 'mt-4 space-y-2';
+        optionsAreaEl.appendChild(spotlight);
+        optionsFooterEl.innerHTML = `<button class="w-full bg-volo-blue text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:bg-volo-blue-dark transition" onclick="handleSportSelection()">Next</button>`;
+        // Initialize spotlight
+        if (typeof updatePicksSpotlight === 'function') updatePicksSpotlight();
+      }
+
+      if (type==='pills' && pillType==='filters'){
+        const wrap = document.createElement('div');
+        wrap.className = 'space-y-5';
+        wrap.innerHTML = `
+          ${renderPillGroup('skill','Skill Level')}
+          ${renderPillGroup('format','Format')}
+          ${renderPillGroup('day','Day of Week')}
+          ${renderPillGroup('vibe','Vibe')}
+        `;
+        optionsAreaEl.appendChild(wrap);
+        optionsFooterEl.innerHTML = `<button class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:bg-green-700 transition" onclick="finishAndApply()">See my activities</button>`;
+      }
+
+      updateMarketingPanel();
+    }
+
+    function renderPillGroup(groupKey, title){
+      if (groupKey==='skill'){
+        const pills = filterPills.skill.map(p=>{
+          const active = userChoices.filters.skill.includes(p.value) ? 'active' : '';
+          return `<button class="skill-button ${active}" onclick='togglePill(this, "skill", "${p.value}")'><span>${p.icon}</span><span>${p.name}</span><span>${p.explainer}</span></button>`;
+        }).join('');
+        // Force 4 in a row
+        return `<div><h3 class="text-sm font-semibold text-gray-700 mb-2">${title}</h3><div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">${pills}</div></div>`;
+      }
+      const pills = filterPills[groupKey].map(p=>{
+        const active = userChoices.filters[groupKey].includes(p.value) ? 'active' : '';
+        return `<button class="pill ${active}" onclick='togglePill(this, "${groupKey}", "${p.value}")'>${p.text}</button>`;
+      }).join('');
+      return `<div><h3 class="text-sm font-semibold text-gray-700 mb-2">${title}</h3><div class="flex flex-wrap gap-2">${pills}</div></div>`;
+    }
+
+    function togglePill(el, type, value){
+      el.classList.toggle('active');
+      const isActive = el.classList.contains('active');
+      let target = (type==='sports') ? userChoices.sports : userChoices.filters[type];
+      if (isActive){ if (!target.includes(value)) target.push(value); }
+      else { const i = target.indexOf(value); if (i>-1) target.splice(i,1); }
+      updateMarketingPanel();
+      // Update inline spotlight if present (sports step)
+      if (type==='sports' && typeof updatePicksSpotlight === 'function') updatePicksSpotlight();
+    }
+
+    // Inline spotlight under sports pills
+    function updatePicksSpotlight(){
+      const box = document.getElementById('picks-spotlight');
+      if (!box) return;
+      const city = userChoices.city;
+      if (userChoices.sports && userChoices.sports.length){
+        const picks = userChoices.sports.slice(0,2);
+        const items = picks.map(s=>{
+          const entry = (marketingLibrary.sportHype && (marketingLibrary.sportHype[s] || marketingLibrary.sportHype['All'])) || { image:'', blurb:'' };
+          return `<div class=\"flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl\">
+                    <img src=\"${entry.image}\" alt=\"${s}\" class=\"w-16 h-16 object-cover rounded-lg border border-slate-200\"/>
+                    <div><div class=\"font-semibold\">${s} in ${city}</div><div class=\"text-sm text-slate-600\">${entry.blurb}</div></div>
+                  </div>`;
+        }).join('');
+        box.innerHTML = `<div class=\"text-xs font-semibold text-slate-600 uppercase\">Your picks spotlight</div>${items}`;
+      } else {
+        box.innerHTML = '';
+      }
+    }
+
+    // Contextual upsell under Daily picker
+    function updateVolopassUpsell(){
+      const box = document.getElementById('volopass-upsell');
+      if (!box) return;
+      const k = userChoices.daily_subtype;
+      if (!k){ box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const volopassUrl = 'https://www.volosports.com/volopass';
+      const copy = {
+        'All': {
+          title: 'Play more, stress less with VoloPass.',
+          body: 'Get unlimited access to drop-ins and pickups citywide — one pass, endless games. Try new sports, meet new people, and never sit out when you’re in the mood to play.'
+        },
+        'Drop-ins': {
+          title: '🏀 Love drop-ins? Go unlimited with VoloPass.',
+          body: 'Skip the sign-ups — grab a spot anytime a team needs a sub. Play new sports, join friends on the fly, and keep the fun going all season long.'
+        },
+        'Pickups': {
+          title: '⚽ Can’t get enough pickup nights? VoloPass has you covered.',
+          body: 'Play whenever your schedule allows — no team, no hassle. Just show up, and we’ll handle the rest. Unlimited games, unlimited good times.'
+        }
+      };
+      const c = copy[k] || copy['All'];
+      box.innerHTML = `
+        <div class="space-y-2">
+          <div class="text-sm font-extrabold">${c.title}</div>
+          <div class="text-sm leading-snug text-indigo-900/90">${c.body}</div>
+          <div>
+            <a href="${volopassUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm font-semibold text-indigo-700 hover:text-indigo-800 hover:underline">Learn more<span class="ml-1">↗</span></a>
+          </div>
+        </div>`;
+      box.classList.remove('hidden');
+    }
+
+    function handleSportSelection(){
+      if (userChoices.sports.length===0){
+        const stepCopy = document.getElementById('step-copy');
+        stepCopy.textContent = 'Please select at least one sport to continue.';
+        stepCopy.classList.add('text-amber-700');
+        return;
+      }
+      runWizardStep('filters');
+    }
+
+    function buildParentPayload(){
+      return JSON.parse(JSON.stringify({ activity_type: userChoices.activity_type, daily_subtype: userChoices.daily_subtype, sports: userChoices.sports, filters: userChoices.filters }));
+    }
+
+    function finishAndApply(){
+      const isEmbedded = (function(){ try { return window.self !== window.top; } catch(_) { return true; } })();
+      if (isEmbedded){ try { window.parent.postMessage({ source: 'volo-wizard', type: 'apply', payload: buildParentPayload() }, '*'); } catch(_){} return; }
+      try {
+        const params = new URLSearchParams();
+        if (userChoices.activity_type) params.append('activity_type', String(userChoices.activity_type).toLowerCase());
+        if (userChoices.daily_subtype) params.append('daily_kind', userChoices.daily_subtype.toLowerCase());
+        (userChoices.sports||[]).forEach(s=>params.append('sport', String(s).toLowerCase()));
+        const all = [...userChoices.filters.skill, ...userChoices.filters.format, ...userChoices.filters.day, ...userChoices.filters.vibe];
+        all.forEach(f=>params.append('filter', f));
+        const baseUrl = 'https://www.volosports.com/discover?cityName=Baltimore';
+        const finalUrl = `${baseUrl}&${params.toString()}`;
+        window.open(finalUrl, '_blank');
+      } catch(_){}
+    }
+
+    function handleOptionClick(nextStep, value){
+      // Set activity type based on the semantic value, not the nextStep identifier
+      if (value === 'league') userChoices.activity_type = 'League';
+      if (value === 'daily') userChoices.activity_type = 'Daily';
+      if (value === 'tournament') userChoices.activity_type = 'Tournament';
+      if (userChoices.activity_type !== 'Daily') userChoices.daily_subtype = null;
+      runWizardStep(nextStep);
+      updateMarketingPanel();
+    }
+
+    function goBack(){
+      if (userChoices.history.length <= 1) return;
+      userChoices.history.pop();
+      const prev = userChoices.history[userChoices.history.length-1];
+      if (prev==='start' || prev==='start_reprompt'){
+        userChoices.activity_type = null; userChoices.daily_subtype = null; userChoices.sports = []; userChoices.filters = { skill:[], format:[], day:[], vibe:[] };
+      }
+      if (prev==='sports'){ userChoices.filters = { skill:[], format:[], day:[], vibe:[] }; }
+      const h=[...userChoices.history]; userChoices.history=[]; runWizardStep(prev); userChoices.history=h; updateMarketingPanel();
+    }
+
+    function runWizardStep(step){
+      if (step !== userChoices.history[userChoices.history.length-1]) userChoices.history.push(step);
+      switch(step){
+        case 'start': {
+          setStepCopy('Choose your commitment', 'Pick what fits your schedule. You can always change your mind.');
+          userChoices.daily_subtype = null;
+          const area = document.getElementById('options-area');
+          const footer = document.getElementById('options-footer');
+          area.innerHTML = '';
+          footer.innerHTML = '';
+          renderBackButton(area);
+          const options = [
+            { key: 'league', icon: 'trophy', label: 'Full season options', nextStep: 'step_2a' },
+            { key: 'daily', icon: 'zap', label: 'One-time games', nextStep: 'daily_kind' },
+            { key: 'tournament', icon: 'flag', label: 'Single-day competition', nextStep: 'step_2c' }
+          ];
+          const grid = document.createElement('div');
+          grid.className = 'grid grid-cols-1 sm:grid-cols-1 gap-3';
+          options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'group rounded-2xl border border-gray-300 p-4 text-left hover:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 flex items-center gap-3 bg-white';
+            btn.innerHTML = `
+              <i data-lucide="${opt.icon}" class="h-6 w-6 text-gray-600 group-hover:text-blue-600"></i>
+              <span class="font-semibold text-gray-900">${opt.label}</span>
+            `;
+            btn.onclick = () => handleOptionClick(opt.nextStep, opt.key);
+            grid.appendChild(btn);
+          });
+          area.appendChild(grid);
+          // Secondary action (left-aligned, blue text, extra top padding)
+          const secondary = document.createElement('div');
+          secondary.className = 'pt-4 text-left';
+          secondary.innerHTML = `<button class="text-sm font-semibold text-volo-blue hover:underline" onclick="handleOptionClick('sports','sports')">Not sure — show sports</button>`;
+          area.appendChild(secondary);
+          break; }
+        case 'step_2a': {
+          const a = marketingLibrary.activity_type.League; 
+          setStepCopy(a.headline, a.copy);
+          renderOptions([
+            { text: 'Yes, show me leagues', value:null, nextStep:'sports' },
+            { text: 'See other options', value:null, nextStep:'start_reprompt' }
+          ]);
+          break; }
+        case 'step_2b': {
+          const a = marketingLibrary.activity_type.Daily; 
+          setStepCopy(a.headline, a.copy);
+          renderOptions([
+            { text: 'Continue', value:null, nextStep:'daily_kind' },
+            { text: 'See other options', value:null, nextStep:'start_reprompt' }
+          ]);
+          break; }
+        case 'daily_kind': {
+          setStepCopy('Daily events: pick a type', 'Pickups or drop‑ins? Choose your vibe — or keep it broad with All.');
+          const area = document.getElementById('options-area');
+          const footer = document.getElementById('options-footer');
+          area.innerHTML = '';
+          footer.innerHTML = '';
+          // Show Back in original (top) position for this step
+          renderBackButton(area);
+          const cards = [
+            { title: 'All', key: 'All', desc: 'Join a drop-in or pickup game for quick, commitment-free fun whenever you’re ready.', icon: 'sparkles', accent: 'blue' },
+            { title: 'Drop-ins', key: 'Drop-ins', desc: 'Jump in for a single game. Try a new sport or join friends without the season‑long commitment.', icon: 'zap', accent: 'amber' },
+            { title: 'Pickups', key: 'Pickups', desc: 'Just show up. We handle teams and gear. Perfect for spontaneous play and packed schedules.', icon: 'users', accent: 'green' }
+          ];
+          const grid = document.createElement('div');
+          grid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3';
+          // Build selectable cards (click selects, Next advances)
+          const cardButtons = [];
+          let selectedKey = null;
+          cards.forEach(c => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.dataset.key = c.key;
+            const accentMap = {
+              blue: { bg: 'bg-blue-50', text: 'text-blue-600', ring: 'focus:ring-blue-600', hover: 'hover:border-blue-600' },
+              amber: { bg: 'bg-amber-50', text: 'text-amber-600', ring: 'focus:ring-amber-600', hover: 'hover:border-amber-500' },
+              green: { bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'focus:ring-emerald-600', hover: 'hover:border-emerald-600' }
+            };
+            const a = accentMap[c.accent] || accentMap.blue;
+            b.className = `group text-left border border-gray-200 rounded-2xl p-4 bg-white ${a.hover} focus:outline-none focus:ring-2 ${a.ring} transition h-full`;
+            // Title row (icon + title), description below as its own block for more room
+            b.innerHTML = `
+              <div class="flex items-start gap-3">
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full ${a.bg} ${a.text}">
+                  <i data-lucide="${c.icon}" class="h-5 w-5"></i>
+                </span>
+                <div class="font-semibold text-gray-900 mt-1">${c.title}</div>
+              </div>
+              <div class="mt-2 text-sm text-slate-600 leading-snug">${c.desc}</div>`;
+            b.onclick = () => {
+              selectedKey = c.key;
+              userChoices.daily_subtype = c.key;
+              // Toggle selected styles
+              cardButtons.forEach(btn => {
+                if (btn.dataset.key === selectedKey){
+                  btn.classList.remove('border-gray-200');
+                  btn.classList.add('border-blue-600', 'ring-2', 'ring-blue-600');
+                } else {
+                  btn.classList.remove('border-blue-600', 'ring-2', 'ring-blue-600');
+                  if (!btn.classList.contains('border-gray-200')) btn.classList.add('border-gray-200');
+                }
+              });
+              const nxt = document.getElementById('dk-next');
+              if (nxt) nxt.disabled = false;
+              if (typeof updateVolopassUpsell === 'function') updateVolopassUpsell();
+            };
+            cardButtons.push(b);
+            grid.appendChild(b);
+          });
+          area.appendChild(grid);
+          // Contextual VoloPass upsell (appears after a selection)
+          const ups = document.createElement('div');
+          ups.id = 'volopass-upsell';
+          ups.className = 'hidden mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-indigo-900';
+          area.appendChild(ups);
+          // Footer with Skip (link) and Next (primary) on the right
+          footer.innerHTML = `
+            <div class="flex items-center justify-end">
+              <div class="flex items-center gap-3">
+                <button class="text-sm text-gray-600 hover:underline" onclick="runWizardStep('sports')">Skip</button>
+                <button id="dk-next" class="bg-volo-blue text-white font-bold py-2.5 px-4 rounded-lg shadow-lg hover:bg-volo-blue-dark transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+              </div>
+            </div>`;
+          const nextBtn = document.getElementById('dk-next');
+          if (nextBtn){
+            nextBtn.onclick = () => {
+              if (!userChoices.daily_subtype) return;
+              updateMarketingPanel();
+              runWizardStep('sports');
+            };
+          }
+          // Preselect previously chosen subtype (on back-navigation)
+          if (userChoices.daily_subtype){
+            const existing = cardButtons.find(btn => btn.dataset.key === userChoices.daily_subtype);
+            if (existing){ existing.click(); }
+            if (typeof updateVolopassUpsell === 'function') updateVolopassUpsell();
+          }
+          break; }
+        case 'step_2c': {
+          const a = marketingLibrary.activity_type.Tournament; 
+          setStepCopy(a.headline, a.copy);
+          renderOptions([
+            { text: "Let's explore tournaments", value:null, nextStep:'sports' },
+            { text: 'Go back', value:null, nextStep:'start_reprompt' }
+          ]);
+          break; }
+        case 'start_reprompt':
+          setStepCopy('Choose your commitment', 'Let’s review the main options again.');
+          renderOptions([
+            { text: 'Full season options', value:'league', nextStep:'step_2a' },
+            { text: 'One-time games', value:'daily', nextStep:'daily_kind' },
+            { text: 'Single-day competition', value:'tournament', nextStep:'step_2c' },
+            { text: 'Not sure — show sports', value:'sports', nextStep:'sports' }
+          ]);
+          break;
+        case 'sports':
+          setStepCopy('Pick your sport(s)', 'Choose one or more sports to get tailored results.');
+          renderOptions(null,'pills','sports');
+          break;
+        case 'filters':
+          setStepCopy('Refine your results', 'Select any must‑haves (or skip).');
+          renderOptions(null,'pills','filters');
+          break;
+        case 'results': {
+          const params = new URLSearchParams();
+          if (userChoices.activity_type) params.append('activity_type', userChoices.activity_type.toLowerCase());
+          if (userChoices.daily_subtype) params.append('daily_kind', userChoices.daily_subtype.toLowerCase());
+          (userChoices.sports||[]).forEach(s=>params.append('sport', s.toLowerCase()));
+          const all = [...userChoices.filters.skill, ...userChoices.filters.format, ...userChoices.filters.day, ...userChoices.filters.vibe];
+          all.forEach(f=>params.append('filter', f));
+          const finalUrl = `https://www.volosports.com/discover?cityName=Baltimore&${params.toString()}`;
+          setStepCopy('Your custom results', 'We prepared a filtered list based on your choices.');
+          const area = document.getElementById('options-area');
+          area.innerHTML = '';
+          renderBackButton(area);
+          area.innerHTML += `
+            <div class="text-center p-4 space-y-4">
+              <p class="text-sm text-gray-700">Open your results in a new tab:</p>
+              <a href="${finalUrl}" target="_blank" class="block w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:bg-green-700 transition">See activities</a>
+            </div>
+          `;
+          document.getElementById('options-footer').innerHTML = `<button onclick="restartWizard()" class="w-full text-sm text-gray-600 hover:text-volo-blue hover:underline">Start over</button>`;
+          break; }
+      }
+      updateMarketingPanel();
+      // Refresh icons after dynamic render
+      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+    }
+
+    // ===== LEFT MARKETING PANEL =====
+    function updateMarketingPanel(){
+      const box = document.getElementById('marketing-content');
+      if (!box) return;
+      const city = userChoices.city;
+      const currentStep = userChoices.history[userChoices.history.length-1];
+      const blocks = [];
+
+      // 1) Hero (only before commitment selection)
+      const showHero = !userChoices.activity_type;
+      if (showHero){
+          const hero = marketingLibrary.base.hero || {};
+          const subtitle = (hero.subtitle && String(hero.subtitle).trim()) ? String(hero.subtitle).replace('{{city}}', city) : '';
+        blocks.push(`
+          <div class="relative overflow-hidden rounded-2xl border border-gray-200">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <img src="${hero.image}" alt="Volo hero" class="w-full h-36 xl:h-40 object-cover"/>
+            <div class="absolute bottom-0 p-4 text-white">
+              <div class="text-xs tracking-wide uppercase opacity-90">${city}</div>
+              <h2 class="text-lg font-extrabold leading-tight">${hero.title || ''}</h2>
+              ${subtitle ? `<p class="text-xs opacity-90">${subtitle}</p>` : ''}
+            </div>
+          </div>`);
+        // Quick compare section
+        const compare = (marketingLibrary.compare||[]).map(c => `
+          <div class="flex items-center gap-3 border border-gray-200 rounded-xl p-3 bg-white">
+            <img src="${c.image}" alt="${c.title}" class="w-14 h-14 object-cover rounded-lg border"/>
+            <div class="flex-1">
+              <div class="font-semibold ml-2.5">${c.title}</div>
+              <ul class="text-xs text-slate-600 list-disc ml-5">${c.lines.map(l=>`<li>${l}</li>`).join('')}</ul>
+            </div>
+          </div>`).join('');
+        if (compare){
+          blocks.push(`<div class="space-y-2">
+            <div class="text-xs font-semibold text-slate-600 uppercase">What’s the difference?</div>
+            ${compare}
+          </div>`);
+        }
+      }
+
+      // 2) Stats aligned to selection (with Daily subtype override)
+      let socialSet = marketingLibrary.stats.Base;
+      if (userChoices.activity_type==='League') socialSet = marketingLibrary.stats.League;
+      if (userChoices.activity_type==='Daily'){
+        socialSet = marketingLibrary.stats.Daily;
+        if (userChoices.daily_subtype && marketingLibrary.stats.DailyKinds[userChoices.daily_subtype]){
+          socialSet = marketingLibrary.stats.DailyKinds[userChoices.daily_subtype];
+        }
+      }
+      if (userChoices.activity_type==='Tournament') socialSet = marketingLibrary.stats.Tournament;
+
+      if (Array.isArray(socialSet)){
+        blocks.push(`
+          <div class="grid grid-cols-3 gap-3">
+            ${socialSet.map(s=>`<div class="rounded-xl bg-white border border-gray-200 p-3 text-center">
+              <div class="text-lg md:text-xl font-extrabold">${String(s.kpi).replace('{{city}}', city)}</div>
+              <div class="text-[11px] text-slate-500 leading-tight">${String(s.label).replace('{{city}}', city)}</div>
+            </div>`).join('')}
+          </div>`);
+      }
+
+      // 3) Activity spotlight (once a type is chosen)
+      const aType = userChoices.activity_type || null;
+      if (aType && marketingLibrary.activity_type[aType]){
+        const a = marketingLibrary.activity_type[aType];
+        const bullets = a.bullets.map(b=>`<li class=\"flex items-start gap-2\"><span>✅</span><span>${b}</span></li>`).join('');
+        const quote = a.quote ? `<blockquote class=\"text-sm italic text-slate-700\">“${a.quote.body.replace('{{city}}', city)}”<br><span class=\"not-italic text-slate-500\">${a.quote.author.replace('{{city}}', city)}</span></blockquote>` : '';
+        blocks.push(`
+          <div class="rounded-2xl border border-gray-200 overflow-hidden">
+            <img src="${a.image}" alt="${aType}" class="w-full h-28 object-cover"/>
+            <div class="p-4 space-y-3">
+              <div class="text-xs font-semibold text-volo-blue uppercase">${aType}</div>
+              <h3 class="text-base font-bold">${a.headline}</h3>
+              <ul class="text-sm space-y-1">${bullets}</ul>
+              ${quote}
+            </div>
+          </div>`);
+      }
+
+      // 4) Daily subtype ribbon
+      if (userChoices.activity_type==='Daily' && userChoices.daily_subtype){
+        const dict = {
+          'All': 'Play on your schedule — join a drop-in or pickup game for quick, commitment-free fun whenever you’re ready to play',
+          'Drop-ins': 'Jump in for a single game. Try a new sport or join friends without the season‑long commitment.',
+          'Pickups': 'Just show up. We handle teams and gear. Perfect for spontaneous play and packed schedules.'
+        };
+        blocks.push(`<div class="rounded-xl bg-indigo-50 border border-indigo-200 p-3 text-sm">
+          <div class="text-xs uppercase font-semibold text-indigo-700">Daily: ${userChoices.daily_subtype}</div>
+          <div class="text-slate-700">${dict[userChoices.daily_subtype] || ''}</div>
+        </div>`);
+      }
+
+  // 5) Sports hype (skip on sports step to avoid duplication with inline spotlight)
+  if (currentStep !== 'sports' && userChoices.sports?.length){
+        const picks = userChoices.sports.slice(0,2);
+        const items = picks.map(s=>{
+          const entry = marketingLibrary.sportHype[s] || marketingLibrary.sportHype['All'];
+          return `<div class=\"flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl\">
+                    <img src=\"${entry.image}\" alt=\"${s}\" class=\"w-16 h-16 object-cover rounded-lg border border-slate-200\"/>
+                    <div><div class=\"font-semibold\">${s} in ${city}</div><div class=\"text-sm text-slate-600\">${entry.blurb}</div></div>
+                  </div>`;
+        }).join('');
+        blocks.push(`<div class="space-y-2">
+          <div class="text-xs font-semibold text-slate-600 uppercase">Your picks spotlight</div>
+          ${items}
+        </div>`);
+      }
+
+      box.innerHTML = blocks.join('\n');
+    }
+
+    // ===== RESULTS / RESTART =====
+    function restartWizard(){
+      userChoices.activity_type = null;
+      userChoices.daily_subtype = null;
+      userChoices.sports = [];
+      userChoices.filters = { skill:[], format:[], day:[], vibe:[] };
+      userChoices.history = ['start'];
+      document.getElementById('options-area').innerHTML = '';
+      document.getElementById('options-footer').innerHTML = '';
+      setStepCopy('', '');
+      runWizardStep('start');
+    }
+
+    // ===== BOOT =====
+    document.addEventListener('DOMContentLoaded', () => {
+      runWizardStep('start');
+      updateMarketingPanel();
+      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+    });
+
+    // Notify parent host (if embedded) to close the modal
+    function closeWizardModal(){
+      try {
+        const isEmbedded = (function(){ try { return window.self !== window.top; } catch(_) { return true; } })();
+        if (isEmbedded && window.parent) {
+          window.parent.postMessage({ source: 'volo-wizard', type: 'close' }, '*');
+          return;
+        }
+      } catch(_) {}
+      // Standalone fallback: try history back
+      try { window.history.back(); } catch(_) {}
+    }
+  </script>
+</body>
+</html>
