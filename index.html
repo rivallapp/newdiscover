@@ -4968,10 +4968,10 @@
         }
       }
 
-      // Determine if an activity is a Daily Sports item (Drop-in or PickUp)
+      // Determine if an activity is a Daily Sports item (Drop-in or Pickup)
       function isDailyActivity(a) {
         const t = getActivityType(a);
-        return t === "Drop-in" || t === "PickUp" || a?.source === "daily";
+        return t === "Drop-in" || t === "Pickup" || a?.source === "daily";
       }
 
       // Compute the primary price to display on a card and its suffix label.
@@ -5421,8 +5421,7 @@
                                 <input id="email-capture-input" type="email" required placeholder="email@example.com" class="flex-1 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600" />
                                 <button type="submit" class="shrink-0 inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600">Sign Up</button>
                             </form>
-                            <p class="mt-3 text-sm text-red-600">Promo code is for new customers only.</p>
-                            <p class="mt-2 text-[11px] text-gray-500">*Cannot apply discount to Volo Pass membership.</p>
+                            <p class="mt-2 text-[11px] text-gray-500">Promo code is for new customers only. Cannot apply discount to Volo Pass memberships.</p>
                         </div>
                     `;
             activityCardsContainer.appendChild(card);
@@ -6804,7 +6803,7 @@
             tournaments: ["Tournament"],
             tournament: ["Tournament"],
             // Daily Sports groups common daily offerings
-            "daily sports": ["Drop-in", "PickUp"],
+            "daily sports": ["Drop-in", "Pickup"],
             // Events and Private Rentals included for future data; may yield 0 with current dataset
             events: ["Event", "Watch Party", "Player Party", "Happy Hour"],
             "private rentals": ["Private Rentals", "Rental"],
@@ -6911,7 +6910,7 @@
           if (dailyType === "drop-in") {
             items = items.filter((a) => getActivityType(a) === "Drop-in");
           } else if (dailyType === "pickup") {
-            items = items.filter((a) => getActivityType(a) === "PickUp");
+            items = items.filter((a) => getActivityType(a) === "Pickup");
           }
         }
         if (selectedVenues.length > 0) {
@@ -7329,7 +7328,7 @@
             league: ["League"],
             tournaments: ["Tournament"],
             tournament: ["Tournament"],
-            "daily sports": ["Drop-in", "PickUp"],
+            "daily sports": ["Drop-in", "Pickup"],
             events: ["Event", "Watch Party", "Player Party", "Happy Hour"],
             "private rentals": ["Private Rentals", "Rental"],
           };
@@ -7345,7 +7344,7 @@
           if (dailyType === "drop-in") {
             items = items.filter((a) => getActivityType(a) === "Drop-in");
           } else if (dailyType === "pickup") {
-            items = items.filter((a) => getActivityType(a) === "PickUp");
+            items = items.filter((a) => getActivityType(a) === "Pickup");
           }
         }
         if (selectedVenues.length > 0) {
@@ -9142,7 +9141,7 @@
         if (canon === "drop-in" || canon === "dropin" || canon === "drop in")
           return "Drop-in";
         if (canon === "pickup" || canon === "pick-up" || canon === "pick up")
-          return "PickUp";
+          return "Pickup";
         if (canon === "tournament" || canon === "tournaments")
           return "Tournament";
         if (
@@ -9164,7 +9163,7 @@
         if (activity && activity.source === "tournaments") return "Tournament";
         if (activity && activity.source === "daily") {
           const name = String(activity.program_name || "").toLowerCase();
-          if (/pick\s*-?\s*up/.test(name)) return "PickUp";
+          if (/pick\s*-?\s*up/.test(name)) return "Pickup";
           return "Drop-in";
         }
         return "";
@@ -9177,7 +9176,7 @@
             return '<i data-lucide="trophy" class="w-3.5 h-3.5"></i>';
           case "Drop-in":
             return '<i data-lucide="zap" class="w-3.5 h-3.5"></i>';
-          case "PickUp":
+          case "Pickup":
             return '<i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>';
           case "Tournament":
             return '<i data-lucide="trophy" class="w-3.5 h-3.5"></i>';
@@ -9194,7 +9193,7 @@
         const allowed = new Set([
           "League",
           "Drop-in",
-          "PickUp",
+          "Pickup",
           "Tournament",
           "Event",
           "Private Rentals",
@@ -9204,7 +9203,7 @@
         const colorClass =
           t === "Drop-in"
             ? "text-orange-600"
-            : t === "PickUp"
+            : t === "Pickup"
             ? "text-green-600"
             : t === "League"
             ? "text-blue-500"
