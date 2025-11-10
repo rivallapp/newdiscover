@@ -59,6 +59,32 @@
             border: 2px solid white;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
         }
+    /* Dual-thumb event time sliders: both thumbs blue for consistency */
+    /* Event time slider thumbs: 14px thumb on 6px track -> center with margin-top = -(thumb+2*border - track)/2 = -(14+4-6)/2 = -6px */
+    #event-time-start::-webkit-slider-thumb,
+    #event-time-end::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
+        margin-top: -6px;
+        background: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+    #event-time-start::-moz-range-thumb,
+    #event-time-end::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        margin-top: -6px;
+        background: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+        /* Thicker track for visibility */
+        #event-time-start::-webkit-slider-runnable-track,
+        #event-time-end::-webkit-slider-runnable-track { height: 6px; border-radius: 9999px; background: transparent; }
+        #event-time-start::-moz-range-track,
+        #event-time-end::-moz-range-track { height: 6px; border-radius: 9999px; background: transparent; }
+    /* Remove default focus outline on range inputs to avoid large blue box */
+    #event-time-start:focus, #event-time-end:focus { outline: none; }
+    #event-time-start, #event-time-end { background: transparent; }
         /* Map container styles */
         #map-container {
             position: fixed;
@@ -314,18 +340,18 @@
                             </div>
                         </div>
                         <!-- Events: Start time range filter (shown only in Events scope) -->
-                        <div id="events-starttime-block" class="mt-5 mb-4 hidden" aria-hidden="true">
-                            <div class="flex justify-between items-center">
-                                <h5 class="text-sm font-medium">Start time range</h5>
-                                <span id="event-time-range-summary" class="text-sm text-gray-600" aria-live="polite">Any — Any</span>
+                        <div id="events-starttime-block" class="mt-6 mb-8 py-4 hidden" aria-hidden="true">
+                            <div class="flex justify-between items-center mb-2">
+                                <h5 class="text-sm font-semibold">Start time window</h5>
+                                <span id="event-time-range-summary" class="text-sm text-gray-700" aria-live="polite">Any — Any</span>
                             </div>
-                            <div class="mt-3">
-                                <!-- Dual-thumb slider (two overlapping range inputs) -->
-                                <div class="relative h-8">
-                                    <input id="event-time-start" type="range" min="0" max="1439" step="30" value="0" class="absolute inset-0 w-full" aria-label="Start after">
-                                    <input id="event-time-end" type="range" min="0" max="1439" step="30" value="0" class="absolute inset-0 w-full" aria-label="End before" style="background: transparent;">
+                            <div class="mt-2 space-y-3">
+                                <div id="event-time-track" class="relative h-10 flex items-center select-none" aria-describedby="event-time-help">
+                                    <div class="absolute h-1.5 rounded-full bg-gray-200" style="top:50%; transform:translateY(-50%); left:0; right:0;" aria-hidden="true"></div>
+                                    <div id="event-time-active-band" class="absolute h-1.5 rounded-full bg-blue-500/40" style="top:50%; transform:translateY(-50%);" aria-hidden="true"></div>
+                                    <input id="event-time-start" type="range" min="0" max="1439" step="30" value="0" class="absolute inset-0 w-full appearance-none" aria-label="Start time (left handle)" style="z-index:30;">
+                                    <input id="event-time-end" type="range" min="0" max="1439" step="30" value="1439" class="absolute inset-0 w-full appearance-none" aria-label="End time (right handle)" style="z-index:20;">
                                 </div>
-                                <p class="mt-2 text-xs text-gray-500 leading-snug" id="event-time-help">Drag the two points to set a start-after and end-before window. Set either to Any to disable that side of the range.</p>
                             </div>
                         </div>
                          <!-- Price & Deals -->
@@ -2428,16 +2454,9 @@
             const n = Number(a.price_person_current);
             const t = Number(a.price_team);
             const parts = [];
-            // Rentals: show hourly price range when available
+            // Rentals: omit per-hour text here; pricing is shown as a right-aligned pill in the bottom row
             if (a && a.source === 'rentals') {
-                const min = (a.price_hr_min != null) ? Number(a.price_hr_min) : NaN;
-                const max = (a.price_hr_max != null) ? Number(a.price_hr_max) : NaN;
-                if (Number.isFinite(min) && Number.isFinite(max) && min !== max) {
-                    parts.push(`Per hour: $${min.toLocaleString()}–$${max.toLocaleString()}`);
-                } else if (Number.isFinite(min)) {
-                    parts.push(`Per hour: $${min.toLocaleString()}`);
-                }
-                return parts.join(' | ');
+                return '';
             }
             if (daily) {
                 if (Number.isFinite(n)) {
@@ -2810,6 +2829,7 @@
                 // Event social proof values used by the bottom row template
                 const type = (typeof getActivityType === 'function') ? getActivityType(activity) : '';
                 const isEvent = (type === 'Event' || (activity && activity.source === 'events'));
+                const isRental = (activity && activity.source === 'rentals');
                 const attendeeCount = isEvent ? getAttendeeCount(activity) : null;
                 const eventId = String(activity.id || activity.program_id || activity.name || '');
                 const interestedActive = (isEvent && eventId) ? isEventInterested(eventId) : false;
@@ -2857,15 +2877,35 @@
                         <div class="shrink-0 border-t border-gray-200 px-3 pt-4 pb-4">
                             <div class="flex items-center justify-start gap-5 h-full">
                                 ${isEvent ? `
-                                    ${attendeeCount ? `<div class=\"flex items-center gap-2 min-w-0\"><i data-lucide=\"users\" class=\"h-4 w-4 text-gray-600\"></i><span class=\"meta-text text-xs md:text-sm text-gray-800 truncate\" title=\"${attendeeCount} attending\">${attendeeCount.toLocaleString()} attending</span></div>` : ''}
+                                    ${(() => { const total = getJoinCount(activity); return total ? `<div class=\"flex items-center gap-1 min-w-0\"><span class=\"text-xs md:text-sm text-gray-800 truncate\" title=\"Join ${total.toLocaleString()} attending or interested\">Join <strong>${total.toLocaleString()}</strong> attending or interested</span></div>` : ''; })()}
                                     ${getAgeBadgeHtml(activity)}
                                     <div class=\"ml-auto flex items-center gap-2\">
-                                        <button type=\"button\" class=\"inline-flex items-center gap-1 text-xs md:text-sm font-semibold rounded-full px-3 py-1.5 border ${interestedActive ? 'border-red-600 text-red-600' : 'border-gray-300 text-gray-700'} hover:bg-gray-50\" data-action=\"toggle-interested\" data-activity-id=\"${String(activity.id || activity.program_id || activity.name || '')}\">
+                                        <button type=\"button\" class=\"inline-flex items-center gap-1 text-xs md:text-sm font-semibold rounded-full px-3 py-1.5 border ${interestedActive ? 'border-yellow-600 text-yellow-600' : 'border-gray-300 text-gray-700'} hover:bg-gray-50\" data-action=\"toggle-interested\" data-activity-id=\"${String(activity.id || activity.program_id || activity.name || '')}\">
                                             <i data-lucide=\"heart\" class=\"h-4 w-4\"></i>
                                             <span>${interestedActive ? 'Interested' : 'Mark Interested'}</span>
                                         </button>
                                         ${buildClosingInlineHtml(activity)}
                                     </div>
+                                ` : isRental ? `
+                                    <div class=\"flex items-center gap-2 min-w-0\">
+                                        <i data-lucide=\"layers\" class=\"h-4 w-4 text-gray-600\"></i>
+                                        <span class=\"meta-text text-xs md:text-sm text-gray-800 truncate\" title=\"${activity.units_count || 0} ${activity.units_label}\">${activity.units_count || 0} ${activity.units_label}</span>
+                                    </div>
+                                    <div class=\"flex items-center gap-2 min-w-0\">
+                                        <i data-lucide=\"users\" class=\"h-4 w-4 text-gray-600\"></i>
+                                        <span class=\"meta-text text-xs md:text-sm text-gray-800 truncate\" title=\"Max ${activity.max_guests_per_unit || ''} per ${activity.units_label || 'unit'}\">Max ${activity.max_guests_per_unit || ''} / ${activity.units_label || 'unit'}</span>
+                                    </div>
+                                    ${(() => {
+                                        const min = Number(activity.price_hr_min);
+                                        const max = Number(activity.price_hr_max);
+                                        if (Number.isFinite(min)) {
+                                            const priceLabel = (Number.isFinite(max) && max !== min)
+                                                ? `$${min.toLocaleString()}–$${max.toLocaleString()}/hr`
+                                                : `$${min.toLocaleString()}/hr`;
+                                            return `<div class=\"ml-auto flex items-center\"><span class=\"elev-pill inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-800 text-[12.5px] px-2.5 py-1 border border-gray-300\"><i data-lucide=\"clock\" class=\"w-3.5 h-3.5\"></i><span>${priceLabel}</span></span></div>`;
+                                        }
+                                        return '';
+                                    })()}
                                 ` : `
                                     ${daily ? `${getSurfaceBadgeHtml(activity)}` : ''}
                                     <div class=\"flex items-center gap-2 min-w-0\">
@@ -4644,6 +4684,24 @@
                 if (showRange) {
                     evTimeBlock.classList.remove('hidden');
                     evTimeBlock.setAttribute('aria-hidden','false');
+                    // Ensure full-day default when showing Events: start=0 (Any), end=1439 (Any)
+                    const prevStart = Number(evStartInput.value || 0);
+                    const prevEnd = Number(evEndInput.value || 0);
+                    if (prevEnd === 0) {
+                        evEndInput.value = '1439';
+                        // Update active band and summary to reflect full selection
+                        const band = document.getElementById('event-time-active-band');
+                        if (band) { band.style.left = '0%'; band.style.right = '0%'; }
+                        evSummary.textContent = 'Any — Any';
+                        filtersChanged = true;
+                    }
+                    // Set hit zones for independent thumb dragging
+                    const toPctLocal = (mins) => Math.max(0, Math.min(100, (Number(mins||0) / 1439) * 100));
+                    const sPct = toPctLocal(Number(evStartInput.value||0));
+                    const ePct = toPctLocal(Number(evEndInput.value||1439));
+                    const mid = Math.min(sPct + (ePct - sPct)/2, ePct);
+                    evStartInput.style.clipPath = `inset(0 ${100-mid}% 0 0)`;
+                    evEndInput.style.clipPath = `inset(0 0 0 ${mid}%)`;
                 } else {
                     const prevStart = Number(evStartInput.value || 0);
                     const prevEnd = Number(evEndInput.value || 0);
@@ -5901,55 +5959,95 @@
                 priceRange.addEventListener('change', () => { syncPrice(); applyFiltersAndRerender(); });
                 // Initial hidden; bounds set when a price type is chosen
             }
-            // Events dual-thumb slider: combined summary + gradient track
+            // Events dual-thumb slider: combined summary + active band
             const eventStartRange = document.getElementById('event-time-start');
             const eventEndRange = document.getElementById('event-time-end');
             const eventRangeSummary = document.getElementById('event-time-range-summary');
+            const eventActiveBand = document.getElementById('event-time-active-band');
             if (eventStartRange && eventEndRange && eventRangeSummary) {
                 const toPct = (mins) => Math.max(0, Math.min(100, (Number(mins||0) / 1439) * 100));
                 const toLabel = (mins) => Number(mins||0) > 0 ? minutesToTimeLabel(Number(mins)) : 'Any';
-                const syncGradient = () => {
+                const updateHitZones = () => {
+                    const sPct = toPct(Number(eventStartRange.value||0));
+                    const ePct = toPct(Number(eventEndRange.value||1439));
+                    const mid = Math.min(sPct + (ePct - sPct)/2, ePct);
+                    eventStartRange.style.clipPath = `inset(0 ${100-mid}% 0 0)`;
+                    eventEndRange.style.clipPath = `inset(0 0 0 ${mid}%)`;
+                };
+                const syncBand = () => {
                     const s = Number(eventStartRange.value || 0);
-                    const e = Number(eventEndRange.value || 0);
-                    const sPct = toPct(s);
-                    const ePct = toPct(e || 1439);
-                    const left = s > 0 ? sPct : 0;
-                    const right = e > 0 ? ePct : 100;
-                    // Apply gradient to the top slider (start) to visualize selected window
-                    eventStartRange.style.background = `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${left}%, #2563eb ${left}%, #2563eb ${right}%, #e5e7eb ${right}%, #e5e7eb 100%)`;
+                    const e = Number(eventEndRange.value || 1439);
+                    const left = `${toPct(Math.max(0, Math.min(1439, s)))}%`;
+                    const rightPct = toPct(Math.max(0, Math.min(1439, e)));
+                    const right = `${100 - rightPct}%`;
+                    if (eventActiveBand) {
+                        eventActiveBand.style.left = left;
+                        eventActiveBand.style.right = right;
+                    }
                 };
                 const syncSummary = () => {
                     const s = Number(eventStartRange.value || 0);
-                    const e = Number(eventEndRange.value || 0);
+                    const e = Number(eventEndRange.value || 1439);
                     const sTxt = toLabel(s);
-                    const eTxt = e > 0 ? toLabel(e) : 'Any';
+                    const eTxt = e < 1439 ? toLabel(e) : 'Any';
                     eventRangeSummary.textContent = `${sTxt} — ${eTxt}`;
                 };
                 const clamp = () => {
                     let s = Number(eventStartRange.value || 0);
-                    let e = Number(eventEndRange.value || 0);
-                    if (s > 0 && e > 0 && s > e) {
-                        // Move the handle being dragged to maintain order
-                        // Heuristic: if start just changed, align end; if end changed, align start.
-                        // We'll compare last input event target via a flag.
-                        if (clamp.lastChanged === 'start') {
-                            eventEndRange.value = String(s);
-                        } else if (clamp.lastChanged === 'end') {
-                            eventStartRange.value = String(e);
-                        } else {
-                            eventEndRange.value = String(s);
-                        }
+                    let e = Number(eventEndRange.value || 1439);
+                    if (s > e) {
+                        if (clamp.lastChanged === 'start') eventStartRange.value = String(e);
+                        else if (clamp.lastChanged === 'end') eventEndRange.value = String(s);
+                        else eventStartRange.value = String(e);
                     }
                 };
-                const onStartInput = () => { clamp.lastChanged = 'start'; clamp(); syncGradient(); syncSummary(); applyFiltersAndRerender(); };
-                const onEndInput = () => { clamp.lastChanged = 'end'; clamp(); syncGradient(); syncSummary(); applyFiltersAndRerender(); };
+                const elevate = (which) => {
+                    if (which === 'start') {
+                        eventStartRange.style.zIndex = '30';
+                        eventEndRange.style.zIndex = '20';
+                    } else {
+                        eventEndRange.style.zIndex = '30';
+                        eventStartRange.style.zIndex = '20';
+                    }
+                };
+                const onStartInput = () => { clamp.lastChanged = 'start'; elevate('start'); clamp(); syncBand(); syncSummary(); updateHitZones(); applyFiltersAndRerender(); };
+                const onEndInput = () => { clamp.lastChanged = 'end'; elevate('end'); clamp(); syncBand(); syncSummary(); updateHitZones(); applyFiltersAndRerender(); };
+                const track = document.getElementById('event-time-track');
+                if (track) {
+                    const onPointDown = (e) => {
+                        if (e.target === eventStartRange || e.target === eventEndRange) return; // native drag handles
+                        const rect = track.getBoundingClientRect();
+                        const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                        const x = clientX - rect.left;
+                        const pct = Math.max(0, Math.min(1, x / rect.width));
+                        const raw = pct * 1439;
+                        const snapped = Math.round(raw / 30) * 30;
+                        const sVal = Number(eventStartRange.value||0);
+                        const eVal = Number(eventEndRange.value||1439);
+                        const distToStart = Math.abs(snapped - sVal);
+                        const distToEnd = Math.abs(snapped - eVal);
+                        if (distToStart <= distToEnd) {
+                            eventStartRange.value = String(Math.min(snapped, eVal));
+                            clamp.lastChanged = 'start';
+                            onStartInput();
+                        } else {
+                            eventEndRange.value = String(Math.max(snapped, sVal));
+                            clamp.lastChanged = 'end';
+                            onEndInput();
+                        }
+                    };
+                    track.addEventListener('pointerdown', onPointDown);
+                    track.addEventListener('touchstart', onPointDown, { passive: true });
+                }
                 eventStartRange.addEventListener('input', onStartInput);
                 eventStartRange.addEventListener('change', onStartInput);
                 eventEndRange.addEventListener('input', onEndInput);
                 eventEndRange.addEventListener('change', onEndInput);
-                // Initial paint
-                syncGradient();
+                if (Number(eventEndRange.value || 0) === 0) eventEndRange.value = '1439';
+                syncBand();
                 syncSummary();
+                updateHitZones();
+                elevate('start');
             }
             // Allow selecting and deselecting price-type via label clicks (Member / Non-Member / Team)
             const priceTypeContainer = document.querySelector('#section-price-deals .flex.flex-nowrap');
@@ -7464,6 +7562,14 @@
                 neighborhood: canonical ? (canonical.neighborhood || '') : (e.neighborhood || ''),
                 lat: (typeof lat === 'number' ? lat : null),
                 lng: (typeof lng === 'number' ? lng : null),
+                // Social proof counts (carry through so card can show "Join N attending or interested")
+                attending_or_interested_count: (e.attending_or_interested_count ?? e.attending_interested_count ?? null),
+                attendee_count: (e.attendee_count ?? e.attendees_count ?? null),
+                rsvp_count: (e.rsvp_count ?? null),
+                going_count: (e.going_count ?? null),
+                interest_count: (e.interest_count ?? null),
+                social_count: (e.social_count ?? null),
+                attendees: Array.isArray(e.attendees) ? e.attendees.slice() : (Array.isArray(e.attendee_list) ? e.attendee_list.slice() : []),
             };
         }
 
