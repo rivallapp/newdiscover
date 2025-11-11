@@ -1,16 +1,13 @@
 {
-  "name": "newdiscover",
+  "name": "volo-discover",
   "version": "1.0.0",
-  "description": "",
-  "main": "experience-elevators.js",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "start": "npx serve",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "express": "^4.19.2",
     "jsdom": "^24.1.3"
   }
 }
