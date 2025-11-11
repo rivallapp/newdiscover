@@ -4381,54 +4381,48 @@
         return out;
       }
 
-      // Build day pill(s): Today/Tomorrow badges for Daily items; for others, separate Day and AM/PM pill (with clock icon)
-      function buildDayPillHtml(activity) {
-        const badge = getActivityDayBadge(activity);
-        if (isDailyActivity(activity)) {
-          if (badge === "today") {
-            return `<span class="elev-pill inline-flex items-center gap-1 rounded-full bg-orange-500 text-white text-[12.5px] px-2.5 py-1">Today</span>`;
-          }
-          if (badge === "tomorrow") {
-            return `<span class="elev-pill inline-flex items-center gap-1 rounded-full bg-[rgba(83,83,83,0.90)] text-white text-[12.5px] px-2.5 py-1">Tomorrow</span>`;
-          }
-        }
-        const info = computeDayAndTod(activity);
-        const pills = [];
-        if (info.day) {
-          pills.push(
-            `<span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm">${info.day}</span>`
-          );
-        }
-        if (info.tod) {
-          pills.push(
-            `<span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm"><i data-lucide="clock" class="w-3.5 h-3.5"></i><span>${info.tod}</span></span>`
-          );
-        }
-        // Fallback for Tournaments/Leagues: if title has no day, derive from start_date_text (MM/DD)
-        if (pills.length === 0 && activity) {
-          const isTournament =
-            /tournament/i.test(String(activity.activity_type)) ||
-            activity.source === "tournaments";
-          const isLeague =
-            /league/i.test(String(activity.activity_type)) ||
-            activity.source === "leagues";
-          if (isTournament || isLeague) {
-            const dt = String(activity.start_date_text || "").trim();
-            const m = dt.match(/^(\d{1,2})\/(\d{1,2})$/);
-            if (m && typeof resolveDayFromMMDD === "function") {
-              const mm = Math.min(12, Math.max(1, parseInt(m[1], 10)));
-              const dd = Math.min(31, Math.max(1, parseInt(m[2], 10)));
-              const d = resolveDayFromMMDD(mm, dd);
-              if (d && d.label) {
-                pills.push(
-                  `<span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm">${d.label}</span>`
-                );
-              }
+        // Build day pill(s): Today/Tomorrow badges for Daily items; for others, separate Day and AM/PM pill (with clock icon)
+        function buildDayPillHtml(activity) {
+            const badge = getActivityDayBadge(activity);
+            if (isDailyActivity(activity)) {
+                // Show clean Today/Tomorrow without appended date (remove MM/DD)
+                if (badge === 'today') {
+                    return `<span class="elev-pill inline-flex items-center gap-1 rounded-full bg-orange-500 text-white text-[12.5px] px-2.5 py-1">Today</span>`;
+                }
+                if (badge === 'tomorrow') {
+                    return `<span class="elev-pill inline-flex items-center gap-1 rounded-full bg-[rgba(83,83,83,0.90)] text-white text-[12.5px] px-2.5 py-1">Tomorrow</span>`;
+                }
             }
-          }
+            const info = computeDayAndTod(activity);
+            const pills = [];
+            if (info.day) {
+                // Always show just the day text (remove MM/DD augmentation for Daily)
+                pills.push(`<span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm">${info.day}</span>`);
+            } else if (isDailyActivity(activity)) {
+                // No explicit day token; omit standalone date pill per new spec
+            }
+            if (info.tod) {
+                pills.push(`<span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm"><i data-lucide="clock" class="w-3.5 h-3.5"></i><span>${info.tod}</span></span>`);
+            }
+            // Fallback for Tournaments/Leagues: if title has no day, derive from start_date_text (MM/DD)
+            if (pills.length === 0 && activity) {
+                const isTournament = (/tournament/i.test(String(activity.activity_type)) || activity.source === 'tournaments');
+                const isLeague = (/league/i.test(String(activity.activity_type)) || activity.source === 'leagues');
+                if (isTournament || isLeague) {
+                    const dt = String(activity.start_date_text || '').trim();
+                    const m = dt.match(/^(\d{1,2})\/(\d{1,2})$/);
+                    if (m && typeof resolveDayFromMMDD === 'function') {
+                        const mm = Math.min(12, Math.max(1, parseInt(m[1], 10)));
+                        const dd = Math.min(31, Math.max(1, parseInt(m[2], 10)));
+                        const d = resolveDayFromMMDD(mm, dd);
+                        if (d && d.label) {
+                            pills.push(`<span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm">${d.label}</span>`);
+                        }
+                    }
+                }
+            }
+            return pills.join('');
         }
-        return pills.join("");
-      }
 
       // Format times to compact form:
       // - Remove space before AM/PM (e.g., "09:30 PM" -> "09:30PM")
@@ -5025,101 +5019,105 @@
         return parts.join(" | ");
       }
 
-      // --- DAILY SCHEDULE RESOLUTION ---
-      function resolveRelativeDay(offset) {
-        const n = Number(offset);
-        if (!Number.isFinite(n)) return { label: "", abbrev: "" };
-        const now = new Date();
-        const d = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate() + n
-        );
-        const dow = d.getDay(); // 0=Sun..6=Sat
-        const names = [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ];
-        const abbrs = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        let label = names[dow];
-        if (n === 0) label = "Today";
-        else if (n === 1) label = "Tomorrow";
-        return { label, abbrev: abbrs[dow] };
-      }
-      function getScheduleLine(a) {
-        // For tournaments: show Day Abbrev + date + time range, no weeks label
-        if (
-          a &&
-          (/tournament/i.test(String(a.activity_type)) ||
-            a.source === "tournaments")
-        ) {
-          const t1 = formatTimeCompact(a.time_start || "");
-          const t2 = formatTimeCompact(a.time_end || "");
-          const times = t1 && t2 ? `${t1} - ${t2}` : t1 || t2 || "";
-          const date = String(a.start_date_text || "").trim();
-          let dayAbbrev = "";
-          const m = date.match(/^(\d{1,2})\/(\d{1,2})$/);
-          if (m && typeof resolveDayFromMMDD === "function") {
-            const mm = Math.min(12, Math.max(1, parseInt(m[1], 10)));
-            const dd = Math.min(31, Math.max(1, parseInt(m[2], 10)));
-            const d = resolveDayFromMMDD(mm, dd);
-            if (d && d.abbrev) dayAbbrev = d.abbrev;
-          }
-          const dateLabel = date
-            ? dayAbbrev
-              ? `${dayAbbrev} ${date}`
-              : `${date}`
-            : "";
-          return `${dateLabel}${
-            dateLabel && times ? " · " : ""
-          }${times}`.trim();
+        // --- DAILY SCHEDULE RESOLUTION ---
+        function resolveRelativeDay(offset) {
+            const n = Number(offset);
+            if (!Number.isFinite(n)) return { label: '', abbrev: '' };
+            const now = new Date();
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + n);
+            const dow = d.getDay(); // 0=Sun..6=Sat
+            const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            const abbrs = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            let label = names[dow];
+            if (n === 0) label = 'Today';
+            else if (n === 1) label = 'Tomorrow';
+            return { label, abbrev: abbrs[dow] };
         }
-        // For Events: prefer day label (Today/Tomorrow/Fri) + times; fallback to start_date_text
-        if (
-          a &&
-          (/event/i.test(String(a.activity_type)) || a.source === "events")
-        ) {
-          const dayLabel = a.day_label || a.start_date_text || "";
-          const t1 = formatTimeCompact(a.time_start || "");
-          const t2 = formatTimeCompact(a.time_end || "");
-          const times = t1 && t2 ? `${t1} - ${t2}` : t1 || t2 || "";
-          return `${dayLabel}${dayLabel && times ? " · " : ""}${times}`.trim();
+        function getScheduleLine(a) {
+            // For tournaments: show Day Abbrev + date + time range, no weeks label
+            if (a && (/tournament/i.test(String(a.activity_type)) || a.source === 'tournaments')) {
+                const t1 = formatTimeCompact(a.time_start || '');
+                const t2 = formatTimeCompact(a.time_end || '');
+                const times = (t1 && t2) ? `${t1} - ${t2}` : (t1 || t2 || '');
+                const date = String(a.start_date_text || '').trim();
+                let dayAbbrev = '';
+                const m = date.match(/^(\d{1,2})\/(\d{1,2})$/);
+                if (m && typeof resolveDayFromMMDD === 'function') {
+                    const mm = Math.min(12, Math.max(1, parseInt(m[1], 10)));
+                    const dd = Math.min(31, Math.max(1, parseInt(m[2], 10)));
+                    const d = resolveDayFromMMDD(mm, dd);
+                    if (d && d.abbrev) dayAbbrev = d.abbrev;
+                }
+                const dateLabel = date ? (dayAbbrev ? `${dayAbbrev} ${date}` : `${date}`) : '';
+                return `${dateLabel}${dateLabel && times ? ' · ' : ''}${times}`.trim();
+            }
+            // For Events: prefer day label (Today/Tomorrow/Fri) + times; fallback to start_date_text
+            if (a && (/event/i.test(String(a.activity_type)) || a.source === 'events')) {
+                const dayLabel = a.day_label || a.start_date_text || '';
+                const t1 = formatTimeCompact(a.time_start || '');
+                const t2 = formatTimeCompact(a.time_end || '');
+                const times = (t1 && t2) ? `${t1} - ${t2}` : (t1 || t2 || '');
+                return `${dayLabel}${dayLabel && times ? ' · ' : ''}${times}`.trim();
+            }
+            // For leagues, keep existing copy when weeks/start_date_text present
+            const hasLeagueSchedule = (a && (a.weeks || a.start_date_text));
+            if (hasLeagueSchedule) {
+                const t1 = formatTimeCompact(a.time_start || '');
+                const t2 = formatTimeCompact(a.time_end || '');
+                const times = (t1 && t2) ? `${t1} - ${t2}` : (t1 || t2 || '');
+                const weeks = a.weeks ? `${a.weeks} weeks` : '';
+                const pieces = [];
+                if (a.start_date_text) pieces.push(`Starts ${a.start_date_text}`);
+                if (weeks) pieces.push(weeks);
+                if (times) pieces.push(times);
+                return pieces.join(' · ');
+            }
+            // For Daily Sports / Drop-ins: show weekday name (e.g., Tuesday) + start time and synthesize end time if missing (default duration 45 minutes)
+            if (a && (a.activity_type && /drop[- ]?in|pickup|pick[- ]?up/i.test(String(a.activity_type)))) {
+                // Prefer a concrete weekday name over tokens like Today/Tomorrow
+                let dayLabel = '';
+                try {
+                    const d = getDailyActivityDate(a);
+                    if (d && d instanceof Date && !isNaN(d)) {
+                        const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                        dayLabel = names[d.getDay()];
+                    }
+                } catch(_) {}
+                // If still empty, but we have a Today/Tomorrow badge, resolve to concrete weekday using ET
+                if (!dayLabel) {
+                    try {
+                        const badge = getActivityDayBadge(a);
+                        if (badge === 'today' || badge === 'tomorrow') {
+                            const nowET = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+                            const d = new Date(nowET.getFullYear(), nowET.getMonth(), nowET.getDate() + (badge === 'tomorrow' ? 1 : 0));
+                            const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                            dayLabel = names[d.getDay()];
+                        }
+                    } catch(_) {}
+                }
+                if (!dayLabel) dayLabel = a.day_label || '';
+                const rawStart = a.time_start || '';
+                let rawEnd = a.time_end || '';
+                const startMins = parseTimeToMinutesSimple(rawStart);
+                let endMins = parseTimeToMinutesSimple(rawEnd);
+                // If no valid end time, assume 45-minute duration and compute synthetic end
+                if (!Number.isFinite(endMins) && Number.isFinite(startMins)) {
+                    endMins = startMins + 45;
+                    // Wrap past midnight gracefully (unlikely for morning pickups but safe)
+                    if (endMins >= 24*60) endMins -= 24*60;
+                    // Format back to label
+                    rawEnd = minutesToTimeLabel(endMins).replace(/any time/i,'').trim();
+                }
+                const t1 = formatTimeCompact(rawStart || '');
+                const t2 = formatTimeCompact(rawEnd || '');
+                const times = (t1 && t2) ? `${t1} - ${t2}` : (t1 || t2 || '');
+                return `${dayLabel}${dayLabel && times ? ' · ' : ''}${times}`;
+            }
+            // Fallback to times only
+            const t1 = formatTimeCompact(a && a.time_start || '');
+            const t2 = formatTimeCompact(a && a.time_end || '');
+            return (t1 && t2) ? `${t1} - ${t2}` : (t1 || t2 || '');
         }
-        // For leagues, keep existing copy when weeks/start_date_text present
-        const hasLeagueSchedule = a && (a.weeks || a.start_date_text);
-        if (hasLeagueSchedule) {
-          const t1 = formatTimeCompact(a.time_start || "");
-          const t2 = formatTimeCompact(a.time_end || "");
-          const times = t1 && t2 ? `${t1} - ${t2}` : t1 || t2 || "";
-          const weeks = a.weeks ? `${a.weeks} weeks` : "";
-          const pieces = [];
-          if (a.start_date_text) pieces.push(`Starts ${a.start_date_text}`);
-          if (weeks) pieces.push(weeks);
-          if (times) pieces.push(times);
-          return pieces.join(" · ");
-        }
-        // For Daily Sports / Drop-ins, show day label + times
-        if (
-          a &&
-          a.activity_type &&
-          /drop[- ]?in|pickup|pick[- ]?up/i.test(String(a.activity_type))
-        ) {
-          const dayLabel = a.day_label || "";
-          const t1 = formatTimeCompact(a.time_start || "");
-          const t2 = formatTimeCompact(a.time_end || "");
-          const times = t1 && t2 ? `${t1} - ${t2}` : t1 || t2 || "";
-          return `${dayLabel}${dayLabel && times ? " · " : ""}${times}`;
-        }
-        // Fallback to times only
-        const t1 = formatTimeCompact((a && a.time_start) || "");
-        const t2 = formatTimeCompact((a && a.time_end) || "");
-        return t1 && t2 ? `${t1} - ${t2}` : t1 || t2 || "";
-      }
 
       // Normalize and render Age badge safely
       function normalizeAge(val) {
@@ -8344,57 +8342,41 @@
         );
         if (regDealsBlock) regDealsBlock.classList.remove("hidden");
 
-        // Program Details: keep all blocks visible for Daily
-        const progDetails = document.getElementById("section-program-details");
-        if (progDetails) {
-          const blocks = Array.from(
-            progDetails.querySelectorAll(":scope > div")
-          );
-          blocks.forEach((block) => {
-            block.classList.remove("hidden");
-          });
-        }
+            // Program Details visibility: hide for Daily and Events; show otherwise
+            const progDetails = document.getElementById('section-program-details');
+            if (progDetails) {
+                const wrapper = progDetails.closest('.py-6');
+                const hidePD = daily || isEvents;
+                if (wrapper) wrapper.classList.toggle('hidden', !!hidePD);
+                // When hiding, clear any selections inside to avoid invisible filters affecting results
+                if (hidePD) {
+                    progDetails.querySelectorAll('.filter-input:checked')
+                        .forEach(inp => { inp.checked = false; });
+                }
+            }
 
-        // Ensure the following sections remain visible for Daily only: Program Highlights, Program Details, Amenities & Perks
-        const isDaily = typeof isDailyScope === "function" && isDailyScope();
-        if (isDaily) {
-          [
-            "#section-highlights",
-            "#section-program-details",
-            "#section-amenities",
-          ].forEach((sel) => {
-            const section = document.querySelector(sel);
-            if (!section) return;
-            const wrapper = section.closest(".py-6");
-            if (wrapper) wrapper.classList.remove("hidden");
-          });
+            // Ensure the following sections remain visible for Daily only: Program Highlights and Amenities & Perks (Program Details is hidden for Daily)
+            const isDaily = typeof isDailyScope === 'function' && isDailyScope();
+            if (isDaily) {
+                ['#section-highlights', '#section-amenities'].forEach(sel => {
+                    const section = document.querySelector(sel);
+                    if (!section) return;
+                    const wrapper = section.closest('.py-6');
+                    if (wrapper) wrapper.classList.remove('hidden');
+                });
+            }
+            // Update price slider visibility based on possibly changed radios
+            updatePriceSliderVisibilityAndBounds();
+            // Recompute option states after visibility changes
+            updateFilterOptionStates();
+            // If we programmatically changed filters (e.g., cleared price-type), re-apply filters once
+            if (filtersChanged && typeof applyFiltersAndRerender === 'function') {
+                // Prevent tight recursion by deferring
+                setTimeout(() => { try { applyFiltersAndRerender(); } catch(_) {} }, 0);
+            }
+            // Update last scope tracker (normalize 'league'/'leagues' to 'leagues')
+            __lastActivitiesScope = isLeagues ? 'leagues' : (isTournaments ? 'tournaments' : (isEvents ? 'events' : (isRentals ? 'rentals' : (daily ? 'daily sports' : (actVal || '')))));
         }
-        // Update price slider visibility based on possibly changed radios
-        updatePriceSliderVisibilityAndBounds();
-        // Recompute option states after visibility changes
-        updateFilterOptionStates();
-        // If we programmatically changed filters (e.g., cleared price-type), re-apply filters once
-        if (filtersChanged && typeof applyFiltersAndRerender === "function") {
-          // Prevent tight recursion by deferring
-          setTimeout(() => {
-            try {
-              applyFiltersAndRerender();
-            } catch (_) {}
-          }, 0);
-        }
-        // Update last scope tracker (normalize 'league'/'leagues' to 'leagues')
-        __lastActivitiesScope = isLeagues
-          ? "leagues"
-          : isTournaments
-          ? "tournaments"
-          : isEvents
-          ? "events"
-          : isRentals
-          ? "rentals"
-          : daily
-          ? "daily sports"
-          : actVal || "";
-      }
 
       function renderListPills() {
         const active = getActiveFilters();
@@ -9216,7 +9198,7 @@
                 <div class="absolute left-0 top-0 py-3 px-4 z-10">
                     <span class="type-pill inline-flex items-center gap-1 rounded-full bg-white text-black text-[13px] px-2.5 py-1 shadow-sm">
                         <span class="${colorClass}">${icon}</span>
-                        <span>${t}</span>
+                        <span>${t === 'PickUp' ? 'Pickup' : t}</span>
                     </span>
                 </div>
             `;
